@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { getAuth, GithubAuthProvider, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, GithubAuthProvider, GoogleAuthProvider, sendEmailVerification, signInWithPopup, updateProfile } from 'firebase/auth';
 import app from '../../firebase/firebase.init';
 
 const auth = getAuth(app)
@@ -20,6 +20,7 @@ const RegisterPage = () => {
             const user = result.user
             setSuccess(true)
             console.log(user);
+            verifyEmail()
          })
          .catch(error => {
             setError(error.message)
@@ -35,6 +36,7 @@ const RegisterPage = () => {
             const user = result.user;
             setSuccess(true)
             console.log(user);
+            verifyEmail()
          })
          .catch(error => {
             setError(error.message)
@@ -44,6 +46,62 @@ const RegisterPage = () => {
     // form submit
     const handleFormSubmit = e => {
         e.preventDefault()
+        const form = e.target;
+        // console.log(form);
+        const name = form.name.value;
+        const email = form.email.value;
+        const password = form.password.value;
+        // console.log(name, email, password);
+        //password validation check
+        if(!/(?=.*[A-Za-z])/.test(password)){
+            setError('Please provide at least one letter!!')
+            return
+        }
+        if(!/(?=.*?[0-9])/.test(password))
+        {
+            setError('Please provide at least one number')
+            return;
+        }
+        if(!/(?=.*?[#?!@$%^&*-])/.test(password)){
+            setError('Please provide at least one special character')
+            return
+        }
+        if(!/.{8,}/.test(password)){
+            setError('please provide at least 8 character')
+            return
+        }
+        createUserWithEmailAndPassword(auth, email, password)
+         .then(result => {
+            const user = result.user;
+            setError('')
+            setSuccess(true)
+            console.log(user);
+            updateUserName(name)
+            form.reset()
+            verifyEmail()
+         })
+         .catch(error => {
+            setError(error.message)
+            console.error(error);
+         })
+    }
+    // set user name 
+    const updateUserName = name => {
+        updateProfile(auth.currentUser, {displayName: name})
+         .then(() => {
+            //profile updated
+         })
+         .catch(error => {
+            setError(error.message)
+         })
+    }
+    // verify user email
+    const verifyEmail = () => {
+        sendEmailVerification(auth.currentUser)
+        .then(()=> {
+            //email verification send
+            alert('Please check your email to verify!!')
+        })
     }
     return (
         <div>
@@ -56,21 +114,21 @@ const RegisterPage = () => {
                         <form onSubmit={handleFormSubmit} action="" className="self-stretch space-y-3 ng-untouched ng-pristine ng-valid">
                             <div>
                                 <label htmlFor="name" className="text-sm sr-only">Your name</label>
-                                <input id="name" type="text" placeholder="Your name" className="w-full rounded-md focus:ring focus:ring-emerald-400 dark:border-gray-700 p-2" />
+                                <input name='name' id="name" type="text" placeholder="Your name" className="w-full rounded-md focus:ring focus:ring-emerald-400 dark:border-gray-700 p-2 text-gray-800" required/>
                             </div>
                             <div>
-                                <label htmlFor="lastname" className="text-sm sr-only">Email address</label>
-                                <input id="lastname" type="text" placeholder="Email address" className="w-full rounded-md focus:ring focus:ring-emerald-400 dark:border-gray-700 p-2" />
+                                <label htmlFor="email" className="text-sm sr-only">Email address</label>
+                                <input name='email' id="email" type="Email" placeholder="Email address" className="w-full rounded-md focus:ring focus:ring-emerald-400 dark:border-gray-700 p-2 text-gray-800" required/>
                             </div>
                             <div>
                                 <label htmlFor="password" className="text-sm sr-only">Password</label>
-                                <input id="password" type="password" placeholder="Password" className="w-full rounded-md focus:ring focus:ring-emerald-400 dark:border-gray-700 p-2" />
+                                <input name='password' id="password" type="password" placeholder="Password" className="w-full rounded-md focus:ring focus:ring-emerald-400 dark:border-gray-700 p-2 text-gray-800" required/>
                             </div>
                             <button type="submit" className="w-full py-2 font-semibold rounded dark:bg-emerald-400 dark:text-gray-900 border-emerald-50 
                             focus:bg-emerald-500 focus:text-gray-600">Register</button>
-                            <button onClick={handleGoogleSignIn} type="submit" className="w-full py-2 font-semibold rounded dark:bg-emerald-400 dark:text-gray-900 border-emerald-50 
+                            <button onClick={handleGoogleSignIn} type="button" className="w-full py-2 font-semibold rounded dark:bg-emerald-400 dark:text-gray-900 border-emerald-50 
                             focus:bg-emerald-500 focus:text-gray-600 flex justify-center"><img className='h-7' src="https://cdn-icons-png.flaticon.com/512/2504/2504739.png" alt="" /></button>
-                            <button onClick={handleGithubSignIn} type="submit" className="w-full py-2 font-semibold rounded dark:bg-emerald-400 dark:text-gray-900 border-emerald-50 
+                            <button onClick={handleGithubSignIn} type="button" className="w-full py-2 font-semibold rounded dark:bg-emerald-400 dark:text-gray-900 border-emerald-50 
                             focus:bg-emerald-500 focus:text-gray-600 flex justify-center"><img className='h-7' src='https://cdn-icons-png.flaticon.com/512/25/25231.png' alt="logo img" /></button>
                             <p><small>Log in <Link to='/login' className='text-emerald-400 underline cursor-pointer'>here</Link></small></p>
                             <span>{success && <small className='text-green-500'>Account created successfully</small>}</span>
