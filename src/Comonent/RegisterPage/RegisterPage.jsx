@@ -52,6 +52,11 @@ const RegisterPage = () => {
         const email = form.email.value;
         const password = form.password.value;
         // console.log(name, email, password);
+        // first input validation 
+        if(!name && !email && !password){
+            setError("Please fill all the input field!!")
+            return
+        }
         //password validation check
         if(!/(?=.*[A-Za-z])/.test(password)){
             setError('Please provide at least one letter!!')
@@ -105,7 +110,7 @@ const RegisterPage = () => {
     }
     return (
         <div>
-            <h1 className="text-3xl font-semibold my-3 text-emerald-400">Please Register</h1>
+            <h1 className="text-3xl font-semibold my-4 text-emerald-400">If You're new, Please Register</h1>
             
             <section className="p-6 dark:bg-gray-800 dark:text-gray-100">
                 <div className="container grid gap-6 mx-auto text-center lg:grid-cols-2 xl:grid-cols-5">
