@@ -1,4 +1,4 @@
-import { createBrowserRouter } from 'react-router-dom'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import './App.css'
 import Main from './Comonent/Layout/Main'
 import LoginPage from './Comonent/LoginPage/LoginPage'
@@ -16,7 +16,7 @@ function App() {
 
   return (
     <div className="App">
-      <h1>hello fancy login</h1>
+      <RouterProvider router={router}/>
     </div>
   )
 }
